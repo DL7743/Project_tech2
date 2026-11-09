@@ -43,7 +43,7 @@ def rename_product():
     with connect_db() as conn:
         with conn.cursor() as cur:
             cur.execute(sql_select, (product_id, ))
-# нам необходима только одня строка, поэтому используем fetchone
+# нам необходима только одна строка, поэтому используем fetchone
             row = cur.fetchone()
 # с проверкой вытаскиваем текущее название продукта
             if row is None:
@@ -54,15 +54,21 @@ def rename_product():
             new_name = read_non_empty("Новое наименование товара: ")   
 # здесь происходит выполнение изменения названия продукта
             cur.execute(sql_update, (new_name, product_id))
+            row_save = cur.rowcount 
+            if row_save == 0:
+                print("Ошибка: Изменения не были применены базой данных (строка не обновлена).")
+                return
 # выполняем commit чтобы передавалось изменение в NEON DB
             conn.commit() 
 # выполняем вызов строки уже с новым наименованием 
             cur.execute(sql_select, (product_id, ))
             row_after = cur.fetchone()
+            
 # проверяем, что цена и наличие остались прежними, а изменилось только наименование
     if row["price"] == row_after["price"] and row["stock"] == row_after["stock"]:
         print("Проверка пройдена: цена и остаток не изменились.")
         print(f"Старое наименование товара: {row['name']} | Новое наименование товара: {new_name}")  
+        print(f"Успешное переименование продукта: {row_save}")
         
     else:
         print("Ошибка! Цена или остаток изменились в процессе обновления.")
