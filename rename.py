@@ -54,6 +54,7 @@ def rename_product():
             new_name = read_non_empty("Новое наименование товара: ")   
 # здесь происходит выполнение изменения названия продукта
             cur.execute(sql_update, (new_name, product_id))
+# проводим проверку изменения строки 
             row_save = cur.rowcount 
             if row_save == 0:
                 print("Ошибка: Изменения не были применены базой данных (строка не обновлена).")
